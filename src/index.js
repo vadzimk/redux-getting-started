@@ -155,30 +155,65 @@ const todoApp = combineReducers({
 const store = createStore(todoApp);
 
 //FilterLink component switches the current visible todos. It accepts the filter which is a string and children which is the contents of a link
-const FilterLink=({filter, currentFilter, children, onClick})=>{
-    if(filter===currentFilter){
+//the Link component only specifies only the appearance of the link when it is active or inactive
+const Link=({active, children, onClick})=>{
+    if(active){
         return <span>{children}</span>
     }
     return (
         <a href="#"
             onClick={e=>{
                 e.preventDefault();
-                onClick(filter);
+                onClick();
             }}
         >{children}</a>
     );
 };
 
+//FilterLink is a container component it contains the Link presentational component and separates the logic from it
+class FilterLink extends React.Component{
+    //when the FilterLink component mounts, it subscribes to the redux store, so that it rerenders each time an action is dispatched and the store state changes, because it needs to use the store.getState() inside its render method
+    //it's logic calculates the props for the Link component based on FilterLink's own props and the current state of the Redux store and it also specifies the callbacks that will dispatch actions to the store. After the action is dispatched the store will remember the new state returned by the reducer and will call every subscriber. and in this case every FilterLink componet instance is subscribed to the store so they will have their forceupdate methods called on them, and they will rerender according to the current store state.
+    //The FilterLink is a self-sufficient component and it can be used inside a presentational component like the Footer without passing additional props to it to get the data from the store and specify the behavior. This lets us keep the Footer component simple and decoupled from the behavior and the data that its child components need
+    componentDidMount(){
+        this.unsubscribe = store.subscribe(()=>this.forceUpdate());
+    }
+    componentWillUnmount(){
+        this.unsubscribe();
+    }
+    render(){
+        const props = this.props;
+        const state = store.getState();
+        return(
+            <Link
+                active={
+                    //the props.filter is passed to the FilterLink component as props from the parent component, the visibilityfilter is from the redux store, if they match, the link will appear active
+                    props.filter===state.visibilityFilter
+                }
+                // the container component also specifies the behavior of dispatching an action when particular link is clicked
+                onClick={()=>
+                store.dispatch({
+                    type: "SET_VISIBILITY_FILTER",
+                    filter: props.filter
+                })
+                }
+            >
+                {props.children}
+            </Link>
+        );
+    }
+}
+
 //a single list item component - presentational component that doesn't describe any behavior inside
 
-const Footer =({visibilityFilter, onFilterClick})=>( //when using parenthesis no need in return statement
+const Footer =()=>( //when using parenthesis no need in return statement
     <p>
         Show:{" "}
-        <FilterLink filter='SHOW_ALL' currentFilter={visibilityFilter} onClick={onFilterClick}>All</FilterLink>
+        <FilterLink filter='SHOW_ALL' >All</FilterLink>
         {" "}
-        <FilterLink filter='SHOW_ACTIVE' currentFilter={visibilityFilter} onClick={onFilterClick}>Active</FilterLink>
+        <FilterLink filter='SHOW_ACTIVE' >Active</FilterLink>
         {" "}
-        <FilterLink filter='SHOW_COMPLETED' currentFilter={visibilityFilter} onClick={onFilterClick}>Completed</FilterLink>
+        <FilterLink filter='SHOW_COMPLETED' >Completed</FilterLink>
     </p>
 );
 
@@ -269,15 +304,7 @@ const  TodoApp =({todos, visibilityFilter})=>(
                     }
                 )}
             />
-            <Footer
-                visibilityFilter={visibilityFilter}
-                onFilterClick={filter=>
-                    store.dispatch({
-                        type: "SET_VISIBILITY_FILTER",
-                        filter: filter
-                    })
-                }
-            />
+            <Footer />
         </div>
 );
 
