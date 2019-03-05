@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ba28243e-84a3-473e-b57b-30e6336749d0" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
@@ -77,12 +76,12 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="js" value="154" />
+          <entry key="js" value="1416" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="JavaScript" value="154" />
+          <entry key="JavaScript" value="1416" />
         </counts>
       </usages-collector>
     </session>
@@ -104,8 +103,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/index.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="336">
-              <caret line="171" column="21" selection-start-line="171" selection-start-column="21" selection-end-line="171" selection-end-column="21" />
+            <state relative-caret-position="305">
+              <caret line="159" column="38" lean-forward="true" selection-end-line="277" />
               <folding>
                 <element signature="e#63#89#0" expanded="true" />
               </folding>
@@ -133,6 +132,7 @@
     <findStrings>
       <find>scrip</find>
       <find>createStore</find>
+      <find>visibilityFilter</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -228,12 +228,12 @@
       <option name="presentableId" value="Default" />
       <updated>1551727916633</updated>
       <workItem from="1551727917991" duration="28174000" />
-      <workItem from="1551769653648" duration="1110000" />
+      <workItem from="1551769653648" duration="4593000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="29284000" />
+    <option name="totallyTimeSpent" value="32767000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="762" y="30" width="781" height="840" extended-state="0" />
@@ -302,8 +302,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/index.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="336">
-          <caret line="171" column="21" selection-start-line="171" selection-start-column="21" selection-end-line="171" selection-end-column="21" />
+        <state relative-caret-position="305">
+          <caret line="159" column="38" lean-forward="true" selection-end-line="277" />
           <folding>
             <element signature="e#63#89#0" expanded="true" />
           </folding>
