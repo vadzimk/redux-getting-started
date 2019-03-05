@@ -175,6 +175,7 @@ class FilterLink extends React.Component{
     //it's logic calculates the props for the Link component based on FilterLink's own props and the current state of the Redux store and it also specifies the callbacks that will dispatch actions to the store. After the action is dispatched the store will remember the new state returned by the reducer and will call every subscriber. and in this case every FilterLink componet instance is subscribed to the store so they will have their forceupdate methods called on them, and they will rerender according to the current store state.
     //The FilterLink is a self-sufficient component and it can be used inside a presentational component like the Footer without passing additional props to it to get the data from the store and specify the behavior. This lets us keep the Footer component simple and decoupled from the behavior and the data that its child components need
     componentDidMount(){
+        const {store}=this.props;
         this.unsubscribe = store.subscribe(()=>this.forceUpdate());
     }
     componentWillUnmount(){
@@ -182,6 +183,7 @@ class FilterLink extends React.Component{
     }
     render(){
         const props = this.props;
+        const{store}=props;
         const state = store.getState();
         return(
             <Link
@@ -205,14 +207,14 @@ class FilterLink extends React.Component{
 
 //a single list item component - presentational component that doesn't describe any behavior inside
 
-const Footer =()=>( //when using parenthesis no need in return statement
+const Footer =({store})=>( //when using parenthesis no need in return statement
     <p>
         Show:{" "}
-        <FilterLink filter='SHOW_ALL' >All</FilterLink>
+        <FilterLink filter='SHOW_ALL' store={store} >All</FilterLink>
         {" "}
-        <FilterLink filter='SHOW_ACTIVE' >Active</FilterLink>
+        <FilterLink filter='SHOW_ACTIVE' store={store}>Active</FilterLink>
         {" "}
-        <FilterLink filter='SHOW_COMPLETED' >Completed</FilterLink>
+        <FilterLink filter='SHOW_COMPLETED' store={store}>Completed</FilterLink>
     </p>
 );
 
@@ -245,14 +247,16 @@ const getVisibleTodos =(todos, filter)=>{
 class VisibleTodoList extends React.Component{
     //the sore subscription logic:
     componentDidMount(){
+        const {store}=this.props; // to have access to the store from the props
         this.unsubscribe = store.subscribe(()=>this.forceUpdate()); //subscribe a function that will rerender the component by calling the forceUpdate() method of the React Component
     }
     componentWillUnmount(){
         this.unsubscribe();
     }
     render(){
-        //
+
         const props = this.props;
+        const {store}=props;
         const state = store.getState();
         return(
             <TodoList
@@ -279,7 +283,7 @@ const TodoList =({todos, filter, onTodoClick})=>{
 };
 
 let nextTodoId = 0;
-const AddTodo =()=>{
+const AddTodo =({store})=>{
     //functional components don't have instances so we replace this to the local variable
     let input;
     return(
@@ -300,40 +304,33 @@ const AddTodo =()=>{
     );
 };
 
-
-
 //here would go the TodoApp component
-
 
 //The TodoApp is a container component
 //we are passing todos property in the props object in the ReactDOM.render
 //we remove props after separating logic into container components that receive state from the Redux store by themselves
-const  TodoApp =()=>(
-
-
+const  TodoApp =({store})=>(
         //we need to filter visible todos before rendering them - moved to the TodoList props declaration
-
 
         //we are using the callback ref api - the functioin receives the React component instance of or the html dom element in this case as its argument, which can be accessed elsewhere.
         //this.input gets the reference to the input element and it's value property will contain whatever is typed inside the input field
         //none of the container components below need to pass props from the state
         <div>
-            <AddTodo />
-            <VisibleTodoList/>
-            <Footer />
+            <AddTodo store={store}/>
+            <VisibleTodoList store={store}/>
+            <Footer store={store}/>
         </div>
 );
-
 
 //because the container components are subscribed directly to the store, we no longer need the render method containing the toplivel TodoApp component to be subscribed to the store, nor we need to pass any props top-down, and so we remove props from it along with the render method and call ReactDOM.render() just once:
 
 //here we create a store with the top level reducer
-//move the store to the toplevel component as a props, so that it is completely injectable
-const store = createStore(todoApp);
+//to have the store portable for the testing purposes and to suppy different store from the server we inject the store to the toplevel component as a props, so that it is completely injectable. Every container component will need a reference to the store via props. So we pass it down to every container component as prop
+//const store = createStore(todoApp);
 
     ReactDOM.render(
         //here we spread all the fields of the state object into props object  of the TodoApp component
-        <TodoApp />, document.querySelector("#root")
+        <TodoApp store={createStore(todoApp)} />, document.querySelector("#root")
     );
 //we don't render again when the store state changes because the container components are subscribed directly
 
