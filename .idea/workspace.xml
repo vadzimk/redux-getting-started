@@ -76,12 +76,12 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="js" value="4952" />
+          <entry key="js" value="6050" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="JavaScript" value="4952" />
+          <entry key="JavaScript" value="6050" />
         </counts>
       </usages-collector>
     </session>
@@ -103,8 +103,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/index.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="419">
-              <caret line="180" column="27" lean-forward="true" selection-start-line="180" selection-start-column="27" selection-end-line="180" selection-end-column="27" />
+            <state relative-caret-position="115">
+              <caret line="295" lean-forward="true" selection-start-line="295" selection-end-line="295" />
               <folding>
                 <element signature="e#63#89#0" expanded="true" />
                 <element signature="e#161#294#0" />
@@ -115,6 +115,7 @@
                 <element signature="e#4486#4563#0" />
                 <element signature="e#5063#5526#0" />
                 <element signature="e#5809#5886#0" />
+                <element signature="e#7084#7311#0" />
                 <element signature="e#8614#8793#0" />
                 <element signature="e#10363#10389#0" />
               </folding>
@@ -138,6 +139,8 @@
       <find>scrip</find>
       <find>createStore</find>
       <find>visibilityFilter</find>
+      <find>TodoLI</find>
+      <find>AddT</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -233,12 +236,12 @@
       <option name="presentableId" value="Default" />
       <updated>1551727916633</updated>
       <workItem from="1551727917991" duration="28174000" />
-      <workItem from="1551769653648" duration="11246000" />
+      <workItem from="1551769653648" duration="13077000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="39420000" />
+    <option name="totallyTimeSpent" value="41251000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="762" y="30" width="781" height="840" extended-state="0" />
@@ -307,8 +310,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/index.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="419">
-          <caret line="180" column="27" lean-forward="true" selection-start-line="180" selection-start-column="27" selection-end-line="180" selection-end-column="27" />
+        <state relative-caret-position="115">
+          <caret line="295" lean-forward="true" selection-start-line="295" selection-end-line="295" />
           <folding>
             <element signature="e#63#89#0" expanded="true" />
             <element signature="e#161#294#0" />
@@ -319,6 +322,7 @@
             <element signature="e#4486#4563#0" />
             <element signature="e#5063#5526#0" />
             <element signature="e#5809#5886#0" />
+            <element signature="e#7084#7311#0" />
             <element signature="e#8614#8793#0" />
             <element signature="e#10363#10389#0" />
           </folding>

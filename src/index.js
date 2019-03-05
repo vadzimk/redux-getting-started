@@ -227,9 +227,31 @@ const Todo =({onClick, completed,text})=>{
         </li>
     );
 };
+//All container components are similar: their job is to connect a presentational component to the Redux store and specify the data and the behavior that it needs-  it is subscribed to the store!
+//We extract reading the currently visible todos into a separate container component that connects the TodoList to the Redux store:
+class VisibleTodoList extends React.Component{
+    //the sore subscription logic:
+    componentDidMount(){
+        this.unsubscribe = store.subscribe(()=>this.forceUpdate); //subscribe a function that will rerender the component
+    }
+    componentWillUnmount(){
+        this.unsubscribe();
+    }
+    render(){
+        //
+        const props = this.props;
+        const state = store.getState();
+        return(
+            <TodoList
+                todos={getVisibleTodos(state.todos, state.visibilityFilter)}
+                onTodoClick={id=>store.dispatch({type:"TOGGLE_TODO", id:id})}
+            />
+        );
+    }
+}
 
 //also a presentational component, accepts an array of todos
-const TodoLIst =({todos, filter, onTodoClick})=>{
+const TodoList =({todos, filter, onTodoClick})=>{
     return(
         <ul>
             {todos.map(todo=>
@@ -295,15 +317,7 @@ const  TodoApp =({todos, visibilityFilter})=>(
                         id: nextTodoId++
                     })
             }/>
-            <TodoLIst
-                todos={getVisibleTodos(todos, visibilityFilter)}
-                onTodoClick={id=>store.dispatch(
-                    {
-                        type: "TOGGLE_TODO",
-                        id:id
-                    }
-                )}
-            />
+            <VisibleTodoList/>
             <Footer />
         </div>
 );
