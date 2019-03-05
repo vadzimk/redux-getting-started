@@ -265,7 +265,7 @@ const TodoList =({todos, filter, onTodoClick})=>{
     );
 };
 
-const AddTodo =({onAddClick})=>{
+const AddTodo =()=>{
     //functional components don't have instances so we replace this to the local variable
     let input;
     return(
@@ -274,7 +274,11 @@ const AddTodo =({onAddClick})=>{
             <input ref={node=>{input=node}} />
             <button
                 onClick={()=>{
-                    onAddClick(input.value);//dispatches an action, is passed as a prop
+                    store.dispatch({
+                        type: "ADD_TODO",
+                        text: input.value,
+                        id: nextTodoId++
+                    });//dispatches an action, is passed as a prop
                     input.value = ""; //clear the input field after dispatching an action
                 }}
             >Add todo</button>
@@ -301,7 +305,8 @@ let nextTodoId = 0;
 
 //The TodoApp is a container component
 //we are passing todos property in the props object in the ReactDOM.render
-const  TodoApp =({todos, visibilityFilter})=>(
+//we remove props after separating logic into container components that receive state from the Redux store by themselves
+const  TodoApp =()=>(
 
 
         //we need to filter visible todos before rendering them - moved to the TodoList props declaration
@@ -309,27 +314,22 @@ const  TodoApp =({todos, visibilityFilter})=>(
 
         //we are using the callback ref api - the functioin receives the React component instance of or the html dom element in this case as its argument, which can be accessed elsewhere.
         //this.input gets the reference to the input element and it's value property will contain whatever is typed inside the input field
+        //none of the container components below need to pass props from the state
         <div>
-            <AddTodo onAddClick={text=>
-                    store.dispatch({
-                        type: "ADD_TODO",
-                        text: text,
-                        id: nextTodoId++
-                    })
-            }/>
+            <AddTodo />
             <VisibleTodoList/>
             <Footer />
         </div>
 );
 
 
+//because the container components are subscribed directly to the store, we no longer need the render method containing the toplivel TodoApp component to be subscribed to the store, nor we need to pass any props top-down, and so we remove props from it along with the render method and call ReactDOM.render() just once:
 
-const render =()=>{
     ReactDOM.render(
         //here we spread all the fields of the state object into props object  of the TodoApp component
-        <TodoApp {...store.getState()}/>, document.querySelector("#root")
+        <TodoApp />, document.querySelector("#root")
     );
-};
+//we don't render again when the store state changes because the container components are subscribed directly
 
 store.subscribe(render); //subscribe render method to the store
 render();//render the initial state
