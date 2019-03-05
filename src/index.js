@@ -151,8 +151,7 @@ const todoApp = combineReducers({
     visibilityFilter: visibilityFilter
 });
 
-//here we create a store with the top level reducer
-const store = createStore(todoApp);
+
 
 //FilterLink component switches the current visible todos. It accepts the filter which is a string and children which is the contents of a link
 //the Link component only specifies only the appearance of the link when it is active or inactive
@@ -227,12 +226,26 @@ const Todo =({onClick, completed,text})=>{
         </li>
     );
 };
+
+//filters the todos according to the filter value:
+const getVisibleTodos =(todos, filter)=>{
+    switch (filter) {
+        case "SHOW_ALL":
+            return todos;
+        case "SHOW_COMPLETED":
+            return todos.filter(t=>t.completed); //returns only the objects with completed property true
+        case "SHOW_ACTIVE":
+            return todos.filter(t=>!t.completed);
+    }
+};
+
 //All container components are similar: their job is to connect a presentational component to the Redux store and specify the data and the behavior that it needs-  it is subscribed to the store!
 //We extract reading the currently visible todos into a separate container component that connects the TodoList to the Redux store:
+
 class VisibleTodoList extends React.Component{
     //the sore subscription logic:
     componentDidMount(){
-        this.unsubscribe = store.subscribe(()=>this.forceUpdate); //subscribe a function that will rerender the component
+        this.unsubscribe = store.subscribe(()=>this.forceUpdate()); //subscribe a function that will rerender the component by calling the forceUpdate() method of the React Component
     }
     componentWillUnmount(){
         this.unsubscribe();
@@ -265,6 +278,7 @@ const TodoList =({todos, filter, onTodoClick})=>{
     );
 };
 
+let nextTodoId = 0;
 const AddTodo =()=>{
     //functional components don't have instances so we replace this to the local variable
     let input;
@@ -286,22 +300,10 @@ const AddTodo =()=>{
     );
 };
 
-//filters the todos according to the filter value:
-const getVisibleTodos =(todos, filter)=>{
-    switch (filter) {
-        case "SHOW_ALL":
-            return todos;
-        case "SHOW_COMPLETED":
-            return todos.filter(t=>t.completed); //returns only the objects with completed property true
-        case "SHOW_ACTIVE":
-            return todos.filter(t=>!t.completed);
-    }
 
-
-};
 
 //here would go the TodoApp component
-let nextTodoId = 0;
+
 
 //The TodoApp is a container component
 //we are passing todos property in the props object in the ReactDOM.render
@@ -325,14 +327,18 @@ const  TodoApp =()=>(
 
 //because the container components are subscribed directly to the store, we no longer need the render method containing the toplivel TodoApp component to be subscribed to the store, nor we need to pass any props top-down, and so we remove props from it along with the render method and call ReactDOM.render() just once:
 
+//here we create a store with the top level reducer
+//move the store to the toplevel component as a props, so that it is completely injectable
+const store = createStore(todoApp);
+
     ReactDOM.render(
         //here we spread all the fields of the state object into props object  of the TodoApp component
         <TodoApp />, document.querySelector("#root")
     );
 //we don't render again when the store state changes because the container components are subscribed directly
 
-store.subscribe(render); //subscribe render method to the store
-render();//render the initial state
+//store.subscribe(render); //subscribe render method to the store
+//render();//render the initial state
 
 // //log the state object:
 // console.log("initial state");
