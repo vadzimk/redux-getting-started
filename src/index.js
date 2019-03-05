@@ -155,7 +155,7 @@ const todoApp = combineReducers({
 const store = createStore(todoApp);
 
 //FilterLink component switches the current visible todos. It accepts the filter which is a string and children which is the contents of a link
-const FilterLink=({filter, currentFilter, children})=>{
+const FilterLink=({filter, currentFilter, children, onClick})=>{
     if(filter===currentFilter){
         return <span>{children}</span>
     }
@@ -163,12 +163,65 @@ const FilterLink=({filter, currentFilter, children})=>{
         <a href="#"
             onClick={e=>{
                 e.preventDefault();
-                store.dispatch({
-                    type: "SET_VISIBILITY_FILTER",
-                    filter: filter
-                });
+                onClick(filter);
             }}
         >{children}</a>
+    );
+};
+
+//a single list item component - presentational component that doesn't describe any behavior inside
+
+const Footer =({visibilityFilter, onFilterClick})=>( //when using parenthesis no need in return statement
+    <p>
+        Show:{" "}
+        <FilterLink filter='SHOW_ALL' currentFilter={visibilityFilter} onClick={onFilterClick}>All</FilterLink>
+        {" "}
+        <FilterLink filter='SHOW_ACTIVE' currentFilter={visibilityFilter} onClick={onFilterClick}>Active</FilterLink>
+        {" "}
+        <FilterLink filter='SHOW_COMPLETED' currentFilter={visibilityFilter} onClick={onFilterClick}>Completed</FilterLink>
+    </p>
+);
+
+const Todo =({onClick, completed,text})=>{
+    return (
+        <li
+            onClick={onClick}
+            style={{textDecoration: completed ? "line-through" : "none"}}
+        >
+            {text}
+        </li>
+    );
+};
+
+//also a presentational component, accepts an array of todos
+const TodoLIst =({todos, filter, onTodoClick})=>{
+    return(
+        <ul>
+            {todos.map(todo=>
+                <Todo
+                    key={todo.id}
+                    {...todo} /*spread the todo object's properties in the props object */
+                    onClick={()=>onTodoClick(todo.id)}
+                />
+            )}
+        </ul>
+    );
+};
+
+const AddTodo =({onAddClick})=>{
+    //functional components don't have instances so we replace this to the local variable
+    let input;
+    return(
+        //a component has to have a single root element - we are wrapping it in a div here
+        <div>
+            <input ref={node=>{input=node}} />
+            <button
+                onClick={()=>{
+                    onAddClick(input.value);//dispatches an action, is passed as a prop
+                    input.value = ""; //clear the input field after dispatching an action
+                }}
+            >Add todo</button>
+        </div>
     );
 };
 
@@ -189,55 +242,46 @@ const getVisibleTodos =(todos, filter)=>{
 //here would go the TodoApp component
 let nextTodoId = 0;
 
+//The TodoApp is a container component
 //we are passing todos property in the props object in the ReactDOM.render
-class TodoApp extends React.Component{
-    render(){
-        const {todos, visibilityFilter}=this.props; //destructure the props object
-        //we need to filter visible todos before rendering them
-        const visibleTodos = getVisibleTodos(todos, visibilityFilter);
+const  TodoApp =({todos, visibilityFilter})=>(
 
-        return (
-            //we are using the callback ref api - the functioin receives the React component instance of or the html dom element in this case as its argument, which can be accessed elsewhere.
-            //this.input gets the reference to the input element and it's value property will contain whatever is typed inside the input field
-            <div>
-                <input ref={node=>{this.input=node}} />
-                <button
-                    onClick={()=>{
-                        store.dispatch({
-                            type: "ADD_TODO",
-                            text: this.input.value,
-                            id: nextTodoId++
-                        });
-                        this.input.value = ""; //clear the input field after dispatching an action
-                    }}
-                >Add todo</button>
-                <ul>
-                    {visibleTodos.map(todo=>
-                        <li key={todo.id}
-                            onClick={()=>{
-                                store.dispatch({
-                                    type: "TOGGLE_TODO",
-                                    id: todo.id
-                                });
-                            }}
-                            style={{textDecoration: todo.completed ? "line-through" : "none"}}
-                        >
-                            {todo.text}
-                        </li>
-                    )}
-                </ul>
-                <p>
-                    Show:{" "}
-                    <FilterLink filter='SHOW_ALL' currentFilter={visibilityFilter}>All</FilterLink>
-                    {" "}
-                    <FilterLink filter='SHOW_ACTIVE' currentFilter={visibilityFilter}>Active</FilterLink>
-                    {" "}
-                    <FilterLink filter='SHOW_COMPLETED' currentFilter={visibilityFilter}>Completed</FilterLink>
-                </p>
-            </div>
-        );
-    }
-}
+
+        //we need to filter visible todos before rendering them - moved to the TodoList props declaration
+
+
+        //we are using the callback ref api - the functioin receives the React component instance of or the html dom element in this case as its argument, which can be accessed elsewhere.
+        //this.input gets the reference to the input element and it's value property will contain whatever is typed inside the input field
+        <div>
+            <AddTodo onAddClick={text=>
+                    store.dispatch({
+                        type: "ADD_TODO",
+                        text: text,
+                        id: nextTodoId++
+                    })
+            }/>
+            <TodoLIst
+                todos={getVisibleTodos(todos, visibilityFilter)}
+                onTodoClick={id=>store.dispatch(
+                    {
+                        type: "TOGGLE_TODO",
+                        id:id
+                    }
+                )}
+            />
+            <Footer
+                visibilityFilter={visibilityFilter}
+                onFilterClick={filter=>
+                    store.dispatch({
+                        type: "SET_VISIBILITY_FILTER",
+                        filter: filter
+                    })
+                }
+            />
+        </div>
+);
+
+
 
 const render =()=>{
     ReactDOM.render(
