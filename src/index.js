@@ -4,7 +4,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {createStore} from "redux";
-
+import PropTypes from 'prop-types';
 
 //here we extract some code  from the reducer function into a separate reducer - it will deal with a separate item of the todos array
 //this pattern is called reducer composition: different reducers specify how different parts of state tree are updated in response to actions
@@ -175,7 +175,7 @@ class FilterLink extends React.Component{
     //it's logic calculates the props for the Link component based on FilterLink's own props and the current state of the Redux store and it also specifies the callbacks that will dispatch actions to the store. After the action is dispatched the store will remember the new state returned by the reducer and will call every subscriber. and in this case every FilterLink componet instance is subscribed to the store so they will have their forceupdate methods called on them, and they will rerender according to the current store state.
     //The FilterLink is a self-sufficient component and it can be used inside a presentational component like the Footer without passing additional props to it to get the data from the store and specify the behavior. This lets us keep the Footer component simple and decoupled from the behavior and the data that its child components need
     componentDidMount(){
-        const {store}=this.props;
+        const {store}=this.context;
         this.unsubscribe = store.subscribe(()=>this.forceUpdate());
     }
     componentWillUnmount(){
@@ -183,7 +183,7 @@ class FilterLink extends React.Component{
     }
     render(){
         const props = this.props;
-        const{store}=props;
+        const{store}=this.context;
         const state = store.getState();
         return(
             <Link
@@ -205,16 +205,21 @@ class FilterLink extends React.Component{
     }
 }
 
+//mandatory to receivie context :
+FilterLink.contextTypes = {
+    store: PropTypes.object
+};
+
 //a single list item component - presentational component that doesn't describe any behavior inside
 
-const Footer =({store})=>( //when using parenthesis no need in return statement
+const Footer =()=>( //when using parenthesis no need in return statement
     <p>
         Show:{" "}
-        <FilterLink filter='SHOW_ALL' store={store} >All</FilterLink>
+        <FilterLink filter='SHOW_ALL'  >All</FilterLink>
         {" "}
-        <FilterLink filter='SHOW_ACTIVE' store={store}>Active</FilterLink>
+        <FilterLink filter='SHOW_ACTIVE' >Active</FilterLink>
         {" "}
-        <FilterLink filter='SHOW_COMPLETED' store={store}>Completed</FilterLink>
+        <FilterLink filter='SHOW_COMPLETED' >Completed</FilterLink>
     </p>
 );
 
@@ -247,7 +252,7 @@ const getVisibleTodos =(todos, filter)=>{
 class VisibleTodoList extends React.Component{
     //the sore subscription logic:
     componentDidMount(){
-        const {store}=this.props; // to have access to the store from the props
+        const {store}=this.context; // to have access to the store from the context
         this.unsubscribe = store.subscribe(()=>this.forceUpdate()); //subscribe a function that will rerender the component by calling the forceUpdate() method of the React Component
     }
     componentWillUnmount(){
@@ -256,7 +261,7 @@ class VisibleTodoList extends React.Component{
     render(){
 
         const props = this.props;
-        const {store}=props;
+        const {store}=this.context;
         const state = store.getState();
         return(
             <TodoList
@@ -283,7 +288,8 @@ const TodoList =({todos, filter, onTodoClick})=>{
 };
 
 let nextTodoId = 0;
-const AddTodo =({store})=>{
+//functional components also receive context but as a 2nd argument -after the props
+const AddTodo =(props,{store})=>{
     //functional components don't have instances so we replace this to the local variable
     let input;
     return(
@@ -304,21 +310,32 @@ const AddTodo =({store})=>{
     );
 };
 
+//you have to specify which context type you want to receive
+AddTodo.contextTypes = {
+    store: PropTypes.object
+};
+
+//have to specify it to receive the context
+VisibleTodoList.contextTypes={
+    store: PropTypes.object
+};
+
+
 //here would go the TodoApp component
 
 //The TodoApp is a container component
 //we are passing todos property in the props object in the ReactDOM.render
 //we remove props after separating logic into container components that receive state from the Redux store by themselves
-const  TodoApp =({store})=>(
+const  TodoApp =()=>(
         //we need to filter visible todos before rendering them - moved to the TodoList props declaration
 
         //we are using the callback ref api - the functioin receives the React component instance of or the html dom element in this case as its argument, which can be accessed elsewhere.
         //this.input gets the reference to the input element and it's value property will contain whatever is typed inside the input field
         //none of the container components below need to pass props from the state
         <div>
-            <AddTodo store={store}/>
-            <VisibleTodoList store={store}/>
-            <Footer store={store}/>
+            <AddTodo />
+            <VisibleTodoList />
+            <Footer />
         </div>
 );
 
@@ -328,9 +345,34 @@ const  TodoApp =({store})=>(
 //to have the store portable for the testing purposes and to suppy different store from the server we inject the store to the toplevel component as a props, so that it is completely injectable. Every container component will need a reference to the store via props. So we pass it down to every container component as prop
 //const store = createStore(todoApp);
 
+//we shall pass the store implicitly via context
+    class Provider extends React.Component{
+        //getChildContext is a special method that will be called by React
+        //Store is passed to the provider as a prop just once
+        //getChildContext returns a context object with the store property that was passed to it as props. Any component inside the Provider will recieve the context object
+        getChildContext(){
+            return {store: this.props.store};
+        }
+
+        render(){
+            //it returns whatever its child is, so we can wrap any component with a Provider and it's going to render that component
+            return this.props.children;
+        }
+    }
+
+    //For the Context to work, you have to define the childContextTypes on the component that defines getChildContext. It is essential for the context to be turned on. if you don't specify them, no child components will receive the context
+    Provider.childContextTypes = {
+        store: PropTypes.object
+    };
+
     ReactDOM.render(
         //here we spread all the fields of the state object into props object  of the TodoApp component
-        <TodoApp store={createStore(todoApp)} />, document.querySelector("#root")
+        //we wrap the TodoApp with a Prpvider and pass the store to it.
+        //the Provider will make use of React's advanced context feature to make the store available to any component inside it including grandchildren
+        <Provider store={createStore(todoApp)}>
+            <TodoApp  />
+        </Provider>
+            , document.querySelector("#root")
     );
 //we don't render again when the store state changes because the container components are subscribed directly
 
